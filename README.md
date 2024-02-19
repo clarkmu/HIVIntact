@@ -1,131 +1,53 @@
-# HIVIntact
-An automated Python proviral intactness checker for HIV-1 consensus sequences.
+# Docker Installation
 
-# Installation instructions
+Docker is used for creating compute environments that exactly match where they were created.  This aleviates a lot of the hassle of running code written by others.
 
-The pipeline is written in Python 3. The below installation instructions assume that Python 3 is already present on the system. If not, it can be installed via a package manager, e.g. for Debian-based systems:
+Follow [this link](#https://docs.docker.com/get-docker/) to install. <small>If link is outdated, search "How to install docker"</small>
 
-```
-sudo apt install python3
-```
+This Docker image uses `port 8182` to operate.  If your port 8182 is in use, edit `/docker.sh` and `/Dockerfile` to any available port (example, `3002`)
 
-or for RedHat-based systems:
+<i>If you are not running an Apple Silicon machine (M-series), see line 6-9 of /docker.sh</i>
 
-```
-sudo yum install python3
-```
+# Pipeline Installation
 
-or for Macintosh-based systems:
+Create a Docker image to install dependencies with correct versions. Use the following commands in your terminal AT THIS DIRECTORY (`cd xx/xx/HIVIntact`).
 
 ```
-sudo port install python3
+sh docker.sh build
+sh docker.sh start
 ```
 
-Installation on Windows systems is not recommended.
-
-In addition, for local installations, `pip` and `virtualenv` are also required, and can be installed using the commands listed above.
-
-Finally, the pipeline requires that the MAFFT multiple sequence aligner be installed. Again, one of:
+Enter the docker container:
 
 ```
-sudo apt install mafft
-sudo yum install mafft
-sudo port install mafft
+sh docker.sh bash
 ```
 
-depending on your operating system, should get you there.
-
-### Local install (recommended)
-
-Install with:
+Now that you are in the Docker container, install the pipeline:
 
 ```
-git clone --recurse-submodules git@github.com:ramics/intactness-pipeline
-cd intactness-pipeline
+cd /app
 virtualenv -p python3 env
 env/bin/pip install .
+source env/bin/activate
 ```
 
-### Global install
+# Running instructions
 
-Install with:
+1. Place your sequences at `/data/seqs.fasta`
 
-```
-git clone --recurse-submodules git@github.com/ramics/intactness-pipeline
-cd intactness-pipeline
-python3 setup.py build
-sudo python3 setup.py install
-```
+1. `cd /app/data`
 
-Whichever way you choose to install, you'll get a number of warnings if tools needed by the pipeline or one of its dependencies aren't in your path, along with links to download and install those dependencies. 
+1. Run `proviral intact --subtype B seqs.fasta`
 
-# Running the pipeline
+1. Output will be available in this directory
 
-If you've installed locally, you need to activate the Python environment by running `source env/bin/activate`.
+<small>Directory name + location can be changed</small>
 
-Then run on a set of FASTA sequences with:
+## Inputs
 
-```
-proviral intact --subtype B sequences.fasta
-```
+Remove missing sequences (both "-" and "N") from sequences else this pipeline will error.
 
-See help (including how to switch various intactness tests on and off) at:
+## Subtypes
 
-```
-proviral intact --help
-```
-
-Currently available subtypes can be seen by listing the `util/subtype_alignments` folder.
-
-This will return four files:
-
-* `intact.fasta`: all consensus sequences considered to be intact.
-* `nonintact.fasta`: all consensus sequences not considered to be intact.
-* `orfs.json`: locations of ORFs in all sequences.
-* `errors.json`: a JSON dump of the reasons why some sequences were considered not intact.
-
-# Development instructions
-
-## git flow
-
-We're using `git flow` for this project. The package `git-flow` can be installed on most OSes. To get started, go to the `provirus-pipeline` repo on your machine and type:
-
-```
-git flow init
-```
-
-Press enter until you hit the command line again. Then, to develop a feature, say the ability to detect long deletions, type:
-
-```
-git flow feature start long-deletions
-```
-
-You'll now be on a feature branch. If you'd like other people to collborate on your feature branch, you'll need to publish it.  Type:
-
-```
-git flow feature publish long-deletions
-```
-
-Hack away until you're satisfied, then type:
-
-```
-git flow feature finish long-deletions
-```
-
-Follow the instructions, and this will merge your feature into develop.  You can then `git push` to develop, and your feature will be included in the next release.
-
-## Releases
-
-A release is a merge to master.  The `master` branch of this github repo is blocked with a review guard, meaning before you merge `develop` into `master`, you need to open a **pull request** on github from `develop` into `master` and get it reviewed by another contributor.  This is to keep code quality high.
-
-Please bump at least the minor version in `setup.py` with every release.
-
-## Other tips
-
-To reinstall locally without reinstalling dependencies or bumping the version, run:
-
-```
-env/bin/pip install --force-reinstall --no-deps --upgrade .
-```
-
-
+View subtype options at `/util/subtype_alignments` for the `proviral intact --subtype ?` flag.
